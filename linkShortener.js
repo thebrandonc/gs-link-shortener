@@ -1,7 +1,7 @@
-function linkShorty(url) {
+function linkShorty(urlToShorten) {
   const api = 'https://urlbae.com/api/url/add';
   const apiKey = 'INSERT_API_KEY_HERE';
-  const data = { 'url': url };
+  const data = { url: urlToShorten };
 
   const params = {
     contentType: 'application/json',
@@ -40,4 +40,4 @@ function insertLink() {
     const shorty = linkShorty(link);
     cell.setValue(shorty);
   };
-}
+};
