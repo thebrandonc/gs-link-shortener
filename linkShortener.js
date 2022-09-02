@@ -1,28 +1,43 @@
+/** ------------------------------------------------------------------------------
+/** PASTE YOUR API LINK BETWEEN THE QUOTES OF THE apiKey VARIABLE
+/** ------------------------------------------------------------------------------*/
+
+const apiKey = 'PASTE_YOUR_API_KEY_HERE';  // paste your api key between the quotes
+const tabName = 'shortened-links';  // the name of the spreadsheet tab for inserting shortned links
+
+/** ------------------------------------------------------------------------------
+/** BEWARE: EDITING BELOW THIS LINE MAY BREAK THE SCRIPT
+/** ------------------------------------------------------------------------------*/
+
 function linkShorty(urlToShorten) {
-  const api = 'https://urlbae.com/api/url/add';
-  const apiKey = 'INSERT_API_KEY_HERE';
-  const data = { url: urlToShorten };
+  try {
+    const api = 'https://urlbae.com/api/url/add';
+    const data = {url: urlToShorten};
+    const params = {
+      contentType: 'application/json',
+      headers: {'Authorization': `Bearer ${apiKey}`},
+      method: 'post',
+      payload: JSON.stringify(data),
+      escaping: false
+    };
 
-  const params = {
-    contentType: 'application/json',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`
-      },
-    method: "post",
-    payload: JSON.stringify(data),
-    escaping: false
+    const response = UrlFetchApp.fetch(api, params);
+    const readableResponse = response.getContentText();
+    const shorty = JSON.parse(readableResponse).shorturl;
+    
+    return shorty;
+
+  } catch (err) {
+    console.log(err);
   };
+};
 
-  const response = UrlFetchApp.fetch(api, params);
-  const parsedResponse = JSON.parse(response.getContentText());
-  const shorty = parsedResponse.shorturl;
-
-  return shorty;
+function spreadsheet() {
+  return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(tabName);
 };
 
 function getLink() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Sheet1');
-  const range = sheet.getDataRange();
+  const range = spreadsheet().getDataRange();
   const sheetValues = range.getValues();
   const link = sheetValues[sheetValues.length - 1][1];
 
@@ -30,13 +45,12 @@ function getLink() {
 };
 
 function insertLink() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Sheet1');
-  const lastRow = sheet.getLastRow();
+  const lastRow = spreadsheet().getLastRow();
   const cellLocation = `C${lastRow}`;
-  const cell = sheet.getRange(cellLocation);
+  const cell = spreadsheet().getRange(cellLocation);
   const link = getLink();
 
-  if (cell.getValue.length === 0 && link.length > 0) {
+  if (link.length > 0 && cell.getValue.length === 0) {
     const shorty = linkShorty(link);
     cell.setValue(shorty);
   };
